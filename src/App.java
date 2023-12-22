@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.io.*;
 
 public class App {
     public static ArrayList<LifeCycle> entries = new ArrayList<LifeCycle>();

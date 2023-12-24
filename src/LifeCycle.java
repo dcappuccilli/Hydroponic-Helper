@@ -1,6 +1,7 @@
 import java.time.LocalDate;
+import java.io.Serializable;
 
-public class LifeCycle {
+public class LifeCycle implements Serializable {
     final protected String NUTRIENT_LINE;
     final protected String NAME;
     final protected String STRAIN;
@@ -43,6 +44,10 @@ public class LifeCycle {
 
     public int getStage() {
         return stage;
+    }
+
+    public void setStage(int stage) {
+        this.stage = stage;
     }
 
     public String getPhase() {

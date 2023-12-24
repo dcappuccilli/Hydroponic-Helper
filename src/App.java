@@ -1,11 +1,12 @@
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.io.*;
 
 public class App {
-    public static ArrayList<LifeCycle> entries = new ArrayList<LifeCycle>();
+    public static ArrayList<LifeCycle> entries;
     public static void main(String[] args) throws Exception {
         Scanner input = new Scanner(System.in);
         String selection;
@@ -13,6 +14,7 @@ public class App {
         int numSelect = 0;
         //System.out.println(LocalDate.now().compareTo(LocalDate.of(2023, 12, 19)));
         //Title Screen loop
+        entries = readFromFile();
         while (!sentinel) {
             //display existing lifecycles
             welcome();
@@ -28,6 +30,7 @@ public class App {
             else if (Integer.parseInt(selection) <= entries.size() && Integer.parseInt(selection) > 0) {
                 int cycleIndex = Integer.parseInt(selection) - 1;
                 System.out.println("You selected:");
+                numSelect = 0;
                 while (numSelect != 4) {
                     //please remember to update this (above) value when adding more options
                     displayLifeCycle(entries.get(cycleIndex));
@@ -55,11 +58,25 @@ public class App {
                     else if (numSelect == 3) {
                         //Need to add a double/triple check "Are you sure you would like to delete temp.getName()? Note: this action cannot be undone."
                         LifeCycle temp = entries.get(cycleIndex);
-                        entries.remove(cycleIndex);
-                        System.out.println("You have removed " + temp.getName() + " from the index.");
-                        //*Update this enforcement if changing options - back to main menu
-                        numSelect = 4;
+                        String deletion = "";
+                        System.out.println("Are you sure you would like to delete " + temp.getName() + "? This action cannot be undone.");
+                        System.out.println("Enter: Y/N?");
+                        deletion = input.nextLine();
+                        if (deletion.equalsIgnoreCase("y")) {
+                            System.out.println("Type '" + temp.getName() + "' to delete.");
+                            deletion = input.nextLine();
+                            if (deletion.equals(temp.getName())) {
+                                entries.remove(cycleIndex);
+                                System.out.println("You have removed " + temp.getName() + " from the index.");
+                                //*Update this enforcement if changing options - back to main menu
+                                numSelect = 4;
+                            }
+                            else {
+                                System.out.println("Deletion failed.");
+                            } 
+                        }
                     }
+                    writeToFile();
                 }
             }
             else if (Integer.parseInt(selection) == -1) {
@@ -68,6 +85,7 @@ public class App {
             else {
                 System.out.println("Invalid entry");
             }
+            writeToFile();
         }
         System.out.println("Program has ended.");
 
@@ -81,7 +99,7 @@ public class App {
 
     public static void welcome() {
         int count = 0;
-        System.out.println("Hydroponic Helper\n");
+        System.out.println("\nHydroponic Helper\n");
         if (entries.isEmpty()) {
             System.out.println("No entered life cycles...");
         }
@@ -307,10 +325,15 @@ public class App {
     }
 
     public static void initiateBloom(LifeCycle entry, Scanner input) {
-        String selection;
+        String selection = "";
         System.out.println("");
         if (entry.getStage() >= 3) {
-            System.out.println("Bloom already initiated.");
+            System.out.println("Bloom already initiated. Would you like to revert to vegatative?");
+            System.out.println("Enter: Y/N?");
+            selection = input.nextLine();
+            if (selection.equalsIgnoreCase("y")) {
+                entry.setStage(2);
+            }
             return;
         }
         System.out.println("Have the first pistils emerged?");
@@ -324,5 +347,25 @@ public class App {
         else {
             System.out.println("Bloom phase not yet initiated.");
         }
+    }
+
+    public static void writeToFile() throws IOException {
+            FileOutputStream fos = new FileOutputStream("plants.dat");
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(entries);
+            oos.close();
+    }
+
+    public static ArrayList<LifeCycle> readFromFile() throws IOException, ClassNotFoundException {
+        try (FileInputStream fis = new FileInputStream("plants.dat");
+        ObjectInputStream ois = new ObjectInputStream(fis)) {
+            ArrayList<LifeCycle> plants =  (ArrayList<LifeCycle>) ois.readObject();
+            return plants;
+        }
+        catch (Exception e) {
+            return new ArrayList<LifeCycle>();
+        }
+
+        
     }
 }
